@@ -1,17 +1,11 @@
 # Python
 __pycache__/
 *.pyc
-*.pyd
-*.pyo
-venv/
-casavacanze_env/  # Il tuo ambiente virtuale
+# ...
 
 # Database di Django
 db.sqlite3
 
-# Segreti di Django (anche se nel tuo caso la SECRET_KEY è nel settings.py)
-# Se avessi un file .env per le chiavi, lo metteresti qui.
+# Nuova cartella Venv
+venv/ 
 
-# Log e Altro
-*.log
-.DS_Store # (File di sistema di macOS)
