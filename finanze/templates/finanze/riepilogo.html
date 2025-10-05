@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <title>Riepilogo Finanze Casa Vacanze</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        /* Stile specifico per il contenitore del grafico */
+        #chart-container {
+            width: 80%; 
+            margin: auto;
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Finanziaria</h1>
+
+    <p>Gestisci i dati completi su: <a href="/admin/">Area Admin (CRUD)</a></p>
+    
+    <h2>Mese Corrente (Transazioni)</h2>
+    <p>Dati calcolati dalle voci in "Transazione".</p>
+    <ul>
+        <li>Entrate Correnti: <strong>{{ entrate_correnti|floatformat:2 }} €</strong></li>
+        <li>Uscite Correnti: <strong>{{ uscite_correnti|floatformat:2 }} €</strong></li>
+        <li>**GUADAGNO EFFETTIVO DEL MESE: 
+            <span style="color: {% if guadagno_corrente >= 0 %}green{% else %}red{% endif %}">
+                {{ guadagno_corrente|floatformat:2 }} €
+            </span>
+        **</li>
+    </ul>
+
+    <hr>
+
+    <h2>Storico Annuale (Riepiloghi Mensili)</h2>
+    
+    <table border="1" cellpadding="10" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Mese</th>
+                <th>Totale Entrate</th>
+                <th>Totale Uscite</th>
+                <th>Guadagno Netto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for riepilogo in riepiloghi %}
+            <tr>
+                <td>{{ riepilogo.mese }}</td>
+                <td>{{ riepilogo.totale_entrate|floatformat:2 }} €</td>
+                <td>{{ riepilogo.totale_uscite|floatformat:2 }} €</td>
+                <td>{{ riepilogo.guadagno_netto|floatformat:2 }} €</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Nessun riepilogo mensile salvato.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+    
+    <h2>Analisi Aggregata Annuale</h2>
+    <ul>
+        <li>**Guadagno Totale di tutti i mesi:** <strong>{{ guadagno_totale_annuale|floatformat:2 }} €</strong></li>
+        <li>**Media dei guadagni mensili:** <strong>{{ media_guadagno_mensile|floatformat:2 }} €/mese</strong></li>
+    </ul>
+
+    <hr>
+
+    <h2>Andamento Annuale del Guadagno Netto</h2>
+
+    <div id="chart-container">
+        <canvas id="guadagnoChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+    <script>
+        // Estrai i dati dalla lista 'riepiloghi' passata dal context di Django
+        const riepiloghi = [
+            {% for r in riepiloghi %}
+            {
+                mese: "{{ r.mese }}",
+                guadagno: {{ r.guadagno_netto|floatformat:2 }}
+            },
+            {% endfor %}
+        ];
+
+        // Ordiniamo in modo cronologico (dal mese più vecchio al più recente)
+        riepiloghi.reverse();
+
+        // Estraiamo le etichette (Mesi) e i dati (Guadagni)
+        const labels = riepiloghi.map(r => r.mese);
+        const data = riepiloghi.map(r => r.guadagno);
+
+        // Ottieni il contesto del canvas
+        const ctx = document.getElementById('guadagnoChart').getContext('2d');
+
+        // Crea l'istanza del grafico a linee
+        new Chart(ctx, {
+            // CAMBIATO DA 'bar' A 'line'
+            type: 'line', 
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Guadagno Netto Mensile (€)',
+                    data: data,
+                    // Colori più adatti per un grafico a linee
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    fill: false, // Non riempire l'area sotto la linea
+                    tension: 0.1 // Leggera curvatura per un aspetto più fluido
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false, // Per visualizzare meglio le fluttuazioni
+                        title: {
+                            display: true,
+                            text: 'Guadagno Netto (€)'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
