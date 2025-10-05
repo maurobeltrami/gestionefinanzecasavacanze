@@ -6,7 +6,7 @@ Applicazione web realizzata con Django per tracciare entrate e uscite di una cas
 
 1.  **Clona il repository:**
     ```bash
-    git clone [INDIRIZZO DEL TUO REPO]
+    git clone [https://github.com/maurobeltrami/gestionefinanzecasavacanze]
     ```
 
 2.  **Crea e Attiva l'Ambiente Virtuale:**
